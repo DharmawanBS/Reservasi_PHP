@@ -70,7 +70,6 @@ class Vehicle extends Basic_Controller
         $type = $this->validate_input(@$data['type'],FALSE,FALSE,FALSE);
         $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
-        $price = $this->validate_input(@$data['price'],FALSE,FALSE,FALSE);
 
         $id = $this->_check_input($user,NULL,$type,$number,$feature,$price);
 
@@ -110,6 +109,7 @@ class Vehicle extends Basic_Controller
         else {
             for($i=0;$i<sizeof($data);$i++) {
                 $data[$i]->feature = $this->Model_vehicle->select_feature($data[$i]->id);
+                $data[$i]->price = $this->Model_vehicle->select_price($data[$i]->id);
             }
             $this->output_ok($data);
         }
@@ -126,5 +126,41 @@ class Vehicle extends Basic_Controller
         );
         $this->Model_vehicle->update($data,$id);
         $this->output_ok(NULL);
+    }
+
+    public function price_post()
+    {
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,FALSE);
+        $vehicle = $this->validate_input(@$data['vehicle'],TRUE,FALSE,FALSE);
+
+        $data = $this->_price_post($user,$vehicle,$prices);
+
+        $this->Model_vehicle->update_price($data,$vehicle);
+
+        $this->output_ok(NULL);
+    }
+
+    private function _price_post($user,$vehicle,$prices)
+    {
+        $data = array();
+        foreach ($prices as $item)
+        {
+            $price = $this->validate_input(@$item['price'],TRUE,FALSE,FALSE);
+            $start = $this->validate_input(@$item['start'],FALSE,FALSE,FALSE);
+            $usertype = $this->validate_input(@$item['usertype'],TRUE,FALSE,FALSE);
+
+            $temp = array(
+                'price_price' => $price,
+                'price_start' => $start,
+                'vehicle_id' => $vehicle,
+                'user_type_id' => $usertype,
+                'price_created' => $this->date_time,
+                'price_created_id' => $user
+            );
+            array_push($data,$temp);
+        }
+        return $data;
     }
 }
