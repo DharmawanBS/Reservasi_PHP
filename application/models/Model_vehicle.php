@@ -19,6 +19,7 @@ class Model_vehicle extends CI_Model
 
     public function insert($data)
     {
+        //get_compiled_insert/update
         $this->db->insert('vehicle',$data);
         return $this->db->insert_id();
     }
@@ -45,7 +46,7 @@ class Model_vehicle extends CI_Model
         return $this->db->get_compiled_select();
     }
 
-    public function select($id,$is_free,$date)
+    public function select($id,$is_free,$date,$status)
     {
         $count = $this->_status($date);
 
@@ -53,7 +54,7 @@ class Model_vehicle extends CI_Model
             'vehicle_id as id,
             vehicle_type as type,
             vehicle_number as number,
-            vehicle_price as price,
+            vehicle_status as status,
             (
                 case
                     when jum.jumlah is null || jum.jumlah = 0
@@ -62,9 +63,13 @@ class Model_vehicle extends CI_Model
                 end
             ) as is_free'
         );
+        if ( ! is_null($status)) {
+            $this->db->where('vehicle_status',$status);
+        }
         if ( ! is_null($id)) {
             $this->db->where('vehicle_id',$id);
-        }$this->db->where('vehicle_is_active',1);
+        }
+        $this->db->where('vehicle_is_active',1);
         $this->db->from('vehicle');
         $this->db->join('('.$count.') jum','jum.vehicle = vehicle.vehicle_id','left');
         if (is_bool($is_free)) {
@@ -103,14 +108,40 @@ class Model_vehicle extends CI_Model
         else return NULL;
     }
 
-    public function find_price($id)
+    public function find_price($id,$date,$usertype)
     {
-        $this->db->select('vehicle_price');
+        $this->db->select('price_price');
         $this->db->where('vehicle_id',$id);
-        $this->db->from('vehicle');
+        $this->db->where('user_type_id',$usertype);
+        $this->db->where('price_start <=',$date);
+        $this->db->order_by('price_start', 'desc');
+        $this->db->limit(1);
+        $this->db->from('price');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result[0]->vehicle_price;
+        if (sizeof($result) > 0) return $result[0]->price_price;
+        else return NULL;
+    }
+
+    public function update_price($data,$id)
+    {
+        $this->db->where('vehicle_id',$id);
+        $this->db->delete('price');
+
+        if (sizeof($data) > 0) {
+            $this->db->insert_batch('price',$data);
+        }
+    }
+
+    public function select_price($id)
+    {
+        $this->db->select('p.price_price as price, p.price_start as start, p.user_type_id as type_id, u.user_type_name as type_name');
+        $this->db->where('p.vehicle_id',$id);
+        $this->db->where('p.user_type_id=u.user_type_id');
+        $this->db->from('price p, user_type u');
+        $query = $this->db->get();
+        $result = $query->result();
+        if (sizeof($result) > 0) return $result;
         else return NULL;
     }
 }
