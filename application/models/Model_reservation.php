@@ -23,6 +23,11 @@ class Model_reservation extends CI_Model
         return $this->db->insert_id();
     }
 
+    public function insert_crew($data)
+    {
+        $this->db->insert_batch('crew',$data);
+    }
+
     public function update($data,$id)
     {
         $this->db->where('reservation_id',$id);
@@ -39,12 +44,13 @@ class Model_reservation extends CI_Model
         $this->db->where('reservation_end >=',$start);
         $this->db->where('reservation_end <=',$end);
         $this->db->group_end();
+        $this->db->where('reservation_is_approved',1);
         $this->db->where('vehicle_id',$id);
         $this->db->from('reservation');
         return $this->db->count_all_results() == 0;
     }
 
-    public function select($id, $code, $start, $end)
+    public function select($id, $code, $start, $end, $is_approved)
     {
         $this->db->select(
             'reservation_id as id,
@@ -71,6 +77,9 @@ class Model_reservation extends CI_Model
         }
         if ( ! is_null($end)) {
             $this->db->where('reservation_end <=',$end);
+        }
+        if ( ! is_null($is_approved)) {
+            $this->db->where('reservation_is_approved',$is_approved);
         }
         $this->db->where('reservation.vehicle_id = vehicle.vehicle_id');
         $this->db->where('reservation.user_id = user.user_id');

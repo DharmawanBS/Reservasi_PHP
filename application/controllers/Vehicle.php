@@ -21,12 +21,11 @@ class Vehicle extends Basic_Controller
         $this->load->model('Model_vehicle');
     }
 
-    private function _check_input($user,$id,$type,$number,$feature,$price)
+    private function _check_input($user,$id,$type,$number,$feature)
     {
         $data = array(
             'vehicle_type' => $type,
             'vehicle_number' => $number,
-            'vehicle_price' => $price,
             'vehicle_lastmodified' => $this->date_time,
             'vehicle_lastmodified_id' => $user
         );
@@ -71,7 +70,7 @@ class Vehicle extends Basic_Controller
         $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
 
-        $id = $this->_check_input($user,NULL,$type,$number,$feature,$price);
+        $id = $this->_check_input($user,NULL,$type,$number,$feature);
 
         $this->output_ok($id);
     }
@@ -85,9 +84,8 @@ class Vehicle extends Basic_Controller
         $type = $this->validate_input(@$data['type'],FALSE,FALSE,FALSE);
         $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
-        $price = $this->validate_input(@$data['price'],FALSE,FALSE,FALSE);
 
-        $id = $this->_check_input($user,$id,$type,$number,$feature,$price);
+        $id = $this->_check_input($user,$id,$type,$number,$feature);
 
         $this->output_ok($id);
     }
@@ -99,10 +97,13 @@ class Vehicle extends Basic_Controller
         $id = $this->validate_input(@$data['id'],TRUE,FALSE,TRUE);
         $is_free = $this->validate_input(@$data['is_free'],FALSE,FALSE,TRUE);
         $date = $this->validate_input(@$data['date'],FALSE,FALSE,TRUE);
+        $status = $this->validate_input(@$data['status'],FALSE,FALSE,TRUE);
+
         if ( ! is_bool($is_free)) $is_free = NULL;
+        if ( ! is_bool($status)) $status = NULL;
         if (is_null($date)) $date = $this->date_time;
 
-        $data = $this->Model_vehicle->select($id,$is_free,$date);
+        $data = $this->Model_vehicle->select($id,$is_free,$date,$status);
         if (is_null($data)) {
             $this->output_empty();
         }
@@ -130,6 +131,7 @@ class Vehicle extends Basic_Controller
 
     public function price_post()
     {
+        //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
         $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
         $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,FALSE);
@@ -162,5 +164,39 @@ class Vehicle extends Basic_Controller
             array_push($data,$temp);
         }
         return $data;
+    }
+
+    public function activate_post()
+    {
+        //  get input data
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+
+        $data = array(
+            'vehicle_lastmodified' => $this->date_time,
+            'vehicle_lastmodified_id' => $user,
+            'vehicle_status' => TRUE
+        );
+        $this->Model_vehicle->update($data,$id);
+
+        $this->output_ok(NULL);
+    }
+
+    public function deactivate_post()
+    {
+        //  get input data
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+
+        $data = array(
+            'vehicle_lastmodified' => $this->date_time,
+            'vehicle_lastmodified_id' => $user,
+            'vehicle_status' => FALSE
+        );
+        $this->Model_vehicle->update($data,$id);
+
+        $this->output_ok(NULL);
     }
 }
