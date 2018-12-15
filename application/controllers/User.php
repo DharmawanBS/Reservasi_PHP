@@ -82,8 +82,9 @@ class User extends Basic_Controller
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
         $id = $this->validate_input(@$data['id'],TRUE,FALSE,TRUE);
+        $status = $this->validate_input(@$data['status'],FALSE,FALSE,TRUE);
 
-        $data = $this->Model_user->select($id);
+        $data = $this->Model_user->select($id,$status);
         if (is_null($data)) {
             $this->output_empty();
         }
@@ -102,6 +103,40 @@ class User extends Basic_Controller
             'user_is_active' => FALSE
         );
         $this->Model_user->update($data,$id);
+        $this->output_ok(NULL);
+    }
+
+    public function activate_post()
+    {
+        //  get input data
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+
+        $data = array(
+            'user_lastmodified' => $this->date_time,
+            'user_lastmodified_id' => $user,
+            'user_status' => TRUE
+        );
+        $this->Model_user->update($data,$id);
+
+        $this->output_ok(NULL);
+    }
+
+    public function deactivate_post()
+    {
+        //  get input data
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+
+        $data = array(
+            'user_lastmodified' => $this->date_time,
+            'user_lastmodified_id' => $user,
+            'user_status' => FALSE
+        );
+        $this->Model_user->update($data,$id);
+
         $this->output_ok(NULL);
     }
 }

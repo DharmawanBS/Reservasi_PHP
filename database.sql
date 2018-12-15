@@ -8,6 +8,7 @@ create table user
   user_is_active       tinyint(1) default '1' null,
   user_lastmodified    datetime               null,
   user_lastmodified_id int                    null,
+  user_status          tinyint(1)             null,
   constraint user_user_user_id_fk
   foreign key (user_lastmodified_id) references user (user_id)
     on update cascade

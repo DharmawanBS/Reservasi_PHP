@@ -29,15 +29,20 @@ class Model_user extends CI_Model
         $this->db->update('user',$data);
     }
 
-    public function select($id)
+    public function select($id,$status)
     {
         $this->db->select(
             'user_id as id,
-            user_name as name'
+            user_name as name,
+            user_status as status'
         );
         if ( ! is_null($id)) {
             $this->db->where('user_id',$id);
-        }$this->db->where('user_is_active',1);
+        }
+        if ( ! is_null($status)) {
+            $this->db->where('user_status',$status);
+        }
+        $this->db->where('user_is_active',1);
         $this->db->from('user');
         $query = $this->db->get();
         $result = $query->result();
