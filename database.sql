@@ -65,7 +65,9 @@ create table vehicle
 (
   vehicle_id              int auto_increment
     primary key,
-  vehicle_number          text                not null,
+  vehicle_type            text                null,
+  vehicle_number          text                null,
+  vehicle_price           int                 null,
   vehicle_lastmodified    datetime            null,
   vehicle_lastmodified_id int                 null,
   vehicle_created         datetime            null,

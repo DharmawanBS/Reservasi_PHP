@@ -21,11 +21,12 @@ class Vehicle extends Basic_Controller
         $this->load->model('Model_vehicle');
     }
 
-    private function _check_input($user,$id,$type,$number,$feature)
+    private function _check_input($user,$id,$type,$number,$price,$feature)
     {
         $data = array(
             'vehicle_type' => $type,
             'vehicle_number' => $number,
+            'vehicle_price' => $price,
             'vehicle_lastmodified' => $this->date_time,
             'vehicle_lastmodified_id' => $user
         );
@@ -68,9 +69,10 @@ class Vehicle extends Basic_Controller
         $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
         $type = $this->validate_input(@$data['type'],FALSE,FALSE,FALSE);
         $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
+        $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
 
-        $id = $this->_check_input($user,NULL,$type,$number,$feature);
+        $id = $this->_check_input($user,NULL,$type,$number,$price,$feature);
 
         $this->output_ok($id);
     }
@@ -83,9 +85,10 @@ class Vehicle extends Basic_Controller
         $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
         $type = $this->validate_input(@$data['type'],FALSE,FALSE,FALSE);
         $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
+        $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
 
-        $id = $this->_check_input($user,$id,$type,$number,$feature);
+        $id = $this->_check_input($user,$id,$type,$number,$price,$feature);
 
         $this->output_ok($id);
     }
@@ -198,5 +201,10 @@ class Vehicle extends Basic_Controller
         $this->Model_vehicle->update($data,$id);
 
         $this->output_ok(NULL);
+    }
+
+    public function find_price_post()
+    {
+
     }
 }

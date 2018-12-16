@@ -40,6 +40,47 @@ class Reservation extends Basic_Controller
         );
     }
 
+    public function read_post()
+    {
+        //  get input data
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,TRUE);
+        $code = $this->validate_input(@$data['code'],FALSE,FALSE,TRUE);
+        $start = $this->validate_input(@$data['start'],FALSE,FALSE,TRUE);
+        $end = $this->validate_input(@$data['end'],FALSE,FALSE,TRUE);
+        $is_approved = $this->validate_input(@$data['is_approved'],FALSE,FALSE,TRUE);
+
+        $data = $this->Model_reservation->select($id,$code,$start,$end,$is_approved);
+
+        if (is_null($data)) {
+            $this->output_empty();
+        }
+        else {
+            $this->output_ok($data);
+        }
+    }
+
+    private function _need_crew($crew,$id)
+    {
+
+
+        if(sizeof($crew) == 0) $this->output_invalid();
+
+        $list_crew = array();
+        foreach ($crew as $item){
+            $name = $this->validate_input(@$item['name'],FALSE,FALSE,FALSE);
+            $status = $this->validate_input(@$item['status'],FALSE,FALSE,FALSE);
+
+            $temp = array(
+                'reservation_id' => $id,
+                'crew_name' => $name,
+                'crew_status' => $status
+            );
+            array_push($list_crew, $temp);
+        }
+        $this->Model_reservation->insert_crew($list_crew);
+    }
+
     public function reservation_post()
     {
         //  get input data
@@ -50,11 +91,14 @@ class Reservation extends Basic_Controller
         $vehicle = $this->validate_input(@$data['vehicle'],TRUE,FALSE,FALSE);
         $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
         $usertype = $this->validate_input(@$data['usertype'],TRUE,FALSE,FALSE);
+        $crew = $this->validate_input(@$data['vrew'],FALSE,TRUE,TRUE);
 
         if ($this->Model_user_type->is_admin($user)) {
             $is_approved = TRUE;
             $approve_datetime = $this->date_time;
             $approve_id = $user;
+
+            if (is_null($crew) || (is_array($crew) AND sizeof($crew) == 0)) $this->output_invalid();
         }
         else {
             $is_approved = NULL;
@@ -84,30 +128,14 @@ class Reservation extends Basic_Controller
             );
             $this->Model_reservation->update($data,$id);
 
+            if ($is_approved) {
+                $this->_need_crew($data,$id);
+            }
+
             $this->output_ok($code);
         }
         else {
             $this->output_failed();
-        }
-    }
-
-    public function read_post()
-    {
-        //  get input data
-        $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,TRUE);
-        $code = $this->validate_input(@$data['code'],FALSE,FALSE,TRUE);
-        $start = $this->validate_input(@$data['start'],FALSE,FALSE,TRUE);
-        $end = $this->validate_input(@$data['end'],FALSE,FALSE,TRUE);
-        $is_approved = $this->validate_input(@$data['is_approved'],FALSE,FALSE,TRUE);
-
-        $data = $this->Model_reservation->select($id,$code,$start,$end,$is_approved);
-
-        if (is_null($data)) {
-            $this->output_empty();
-        }
-        else {
-            $this->output_ok($data);
         }
     }
 
@@ -119,20 +147,7 @@ class Reservation extends Basic_Controller
         $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
         $crew = $this->validate_input(@$data['vrew'],FALSE,TRUE,FALSE);
 
-        if(sizeof($crew) == 0) $this->output_invalid();
-
-        $list_crew = array();
-        foreach ($crew as $item){
-            $name = $this->validate_input(@$item['name'],FALSE,FALSE,FALSE);
-            $status = $this->validate_input(@$item['status'],FALSE,FALSE,FALSE);
-
-            $temp = array(
-                'reservation_id' => $id,
-                'crew_name' => $name,
-                'crew_status' => $status
-            );
-            array_push($list_crew, $temp);
-        }
+        $this->_need_crew($crew,$id);
 
         $data = array(
             'reservation_approved_datetime' => $this->date_time,
@@ -140,7 +155,6 @@ class Reservation extends Basic_Controller
             'reservation_approved_id' => $user
         );
         $this->Model_reservation->update($data,$id);
-        $this->Model_reservation->insert_crew($list_crew);
     }
 
     public function reject_post()
