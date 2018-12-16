@@ -4,6 +4,7 @@ create table user
     primary key,
   user_key             text                   not null,
   user_password        text                   not null,
+  user_name            text                   not null,
   user_type_id         int                    null,
   user_is_active       tinyint(1) default '1' null,
   user_lastmodified    datetime               null,
@@ -71,7 +72,6 @@ create table vehicle
   vehicle_created_id      int                 null,
   vehicle_is_active       tinyint default '1' null,
   vehicle_status          tinyint(1)          null,
-  vehicle_type            text                null,
   constraint vehicle_user_user_id_fk
   foreign key (vehicle_lastmodified_id) references user (user_id)
     on update cascade
@@ -89,7 +89,7 @@ create table price
   price_price   int      not null,
   price_start   datetime null,
   price_created datetime null,
-  user_id       int      null,
+  price_created_id int null,
   vehicle_id    int      null,
   user_type_id  int      null,
   constraint price_user_type_user_type_id_fk
