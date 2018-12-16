@@ -62,8 +62,6 @@ class Reservation extends Basic_Controller
 
     private function _need_crew($crew,$id)
     {
-
-
         if(sizeof($crew) == 0) $this->output_invalid();
 
         $list_crew = array();

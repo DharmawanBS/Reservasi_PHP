@@ -53,39 +53,38 @@ class Model_reservation extends CI_Model
     public function select($id, $code, $start, $end, $is_approved)
     {
         $this->db->select(
-            'reservation_id as id,
-            reservation_code as code,
-            reservation_start as start,
-            reservation_end as end,
-            reservation_is_approved as app,
-            reservation_approved_datetime as appdate,
-            reservation_approved_id as appuser,
-            reservation_is_active as active,
-            vehicle_id as vehicle,
-            user_id as user,
-            price_id as price,
-            reservation_datetime as created'
+            'reservation.reservation_id as id,
+            reservation.reservation_code as code,
+            reservation.reservation_start as start,
+            reservation.reservation_end as end,
+            reservation.reservation_is_approved as app,
+            reservation.reservation_approved_datetime as appdate,
+            reservation.reservation_approved_id as appuser,
+            reservation.reservation_is_active as active,
+            reservation.vehicle_id as vehicle,
+            reservation.user_id as user,
+            reservation.price as price,
+            reservation.reservation_datetime as created'
         );
         if ( ! is_null($id)) {
-            $this->db->where('reservation_id',$id);
+            $this->db->where('reservation.reservation_id',$id);
         }
         if ( ! is_null($code)) {
-            $this->db->like('LOWER(reservation_code)',strtolower($code));
+            $this->db->like('LOWER(reservation.reservation_code)',strtolower($code));
         }
         if ( ! is_null($start)) {
-            $this->db->where('reservation_start >=',$start);
+            $this->db->where('reservation.reservation_start >=',$start);
         }
         if ( ! is_null($end)) {
-            $this->db->where('reservation_end <=',$end);
+            $this->db->where('reservation.reservation_end <=',$end);
         }
         if ( ! is_null($is_approved)) {
-            $this->db->where('reservation_is_approved',$is_approved);
+            $this->db->where('reservation.reservation_is_approved',$is_approved);
         }
         $this->db->where('reservation.vehicle_id = vehicle.vehicle_id');
         $this->db->where('reservation.user_id = user.user_id');
         $this->db->where('reservation.reservation_approved_id = user.user_id');
-        $this->db->where('reservation.price_id = price.price_id');
-        $this->db->from('reservation,vehicle,user,price');
+        $this->db->from('reservation,vehicle,user');
         $query = $this->db->get();
         $result = $query->result();
         if (sizeof($result) > 0) return $result;
