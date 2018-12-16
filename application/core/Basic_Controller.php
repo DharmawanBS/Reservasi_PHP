@@ -9,6 +9,9 @@ require_once APPPATH.'/libraries/REST_Controller.php';
 
 class Basic_Controller extends REST_Controller
 {
+    protected $date_time;
+    protected $date;
+
     const MSG_OK = 'OK';
     // ouput failed
     const MSG_FAILED = 'FAILED';

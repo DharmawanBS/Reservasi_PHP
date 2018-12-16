@@ -33,16 +33,15 @@ class Model_vehicle extends CI_Model
     private function _status($date)
     {
         $this->db->select(
-            'reservasi_vehicle as vehicle,
+            'vehicle_id as vehicle,
             count(*) as jumlah'
         );
         $this->db->group_start();
-        $this->db->where('reservasi_start >=',$date);
-        $this->db->where('reservasi_start <=',$date);
+        $this->db->where('reservation_start >=',$date);
+        $this->db->where('reservation_start <=',$date);
         $this->db->group_end();
-        $this->db->where('reservasi_vehicle');
-        $this->db->from('reservasi');
-        $this->db->group_by('reservasi_vehicle');
+        $this->db->from('reservation');
+        $this->db->group_by('vehicle_id');
         return $this->db->get_compiled_select();
     }
 
@@ -108,18 +107,17 @@ class Model_vehicle extends CI_Model
         else return NULL;
     }
 
-    public function find_price($id,$date,$usertype)
+    public function find_price($id, $date, $user_type)
     {
-        $this->db->select('price_price');
-        $this->db->where('vehicle_id',$id);
-        $this->db->where('user_type_id',$usertype);
-        $this->db->where('price_start <=',$date);
-        $this->db->order_by('price_start', 'desc');
+        $this->db->select('price.price_price as normal_price,vehicle.vehicle_price as global_price');
+        $this->db->where('vehicle.vehicle_id',$id);
+        $this->db->order_by('price.price_start', 'desc');
         $this->db->limit(1);
-        $this->db->from('price');
+        $this->db->from('vehicle');
+        $this->db->join('price',"vehicle.vehicle_id = price.vehicle_id AND price.user_type_id = ".$user_type." AND price.price_start <= '".$date."'",'left');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result[0]->price_price;
+        if (sizeof($result) > 0) return $result[0];
         else return NULL;
     }
 

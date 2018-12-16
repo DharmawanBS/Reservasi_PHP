@@ -205,6 +205,17 @@ class Vehicle extends Basic_Controller
 
     public function find_price_post()
     {
+        //  get input data
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $user_type = $this->validate_input(@$data['user_type'],TRUE,FALSE,FALSE);
 
+        $prices = $this->Model_vehicle->find_price($id,$this->date,$user_type);
+        if ($prices) {
+            $this->output_ok($prices);
+        }
+        else {
+            $this->output_empty();
+        }
     }
 }
