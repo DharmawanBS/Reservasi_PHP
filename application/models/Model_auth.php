@@ -23,6 +23,7 @@ class Model_auth extends CI_Model
         $this->db->where('user_key',$username);
         $this->db->where('user_password',$password);
         $this->db->where('user_is_active',1);
+        $this->db->where('user_status',1);
         $this->db->from('user');
         $query = $this->db->get();
         $result = $query->result();

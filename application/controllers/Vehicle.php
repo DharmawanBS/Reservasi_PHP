@@ -138,11 +138,11 @@ class Vehicle extends Basic_Controller
         $data = json_decode(file_get_contents('php://input'), TRUE);
         $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
         $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,FALSE);
-        $vehicle = $this->validate_input(@$data['vehicle'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
 
-        $data = $this->_price_post($user,$vehicle,$prices);
+        $data = $this->_price_post($user,$id,$prices);
 
-        $this->Model_vehicle->update_price($data,$vehicle);
+        $this->Model_vehicle->update_price($data,$id);
 
         $this->output_ok(NULL);
     }
