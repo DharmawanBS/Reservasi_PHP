@@ -9,6 +9,7 @@
 /**
  * @property Model_vehicle $Model_vehicle
  * @property Model_reservation $Model_reservation
+ * @property Model_user_type $Model_user_type
  */
 class Reservation extends Basic_Controller
 {
@@ -21,7 +22,7 @@ class Reservation extends Basic_Controller
     {
         parent::__construct();
 
-        $this->load->model(array('Model_vehicle','Model_reservation'));
+        $this->load->model(array('Model_vehicle','Model_reservation','Model_user_type'));
 
         $this->month = array(
             'JA',
@@ -47,34 +48,43 @@ class Reservation extends Basic_Controller
         $start = $this->validate_input(@$data['start'],FALSE,FALSE,FALSE);
         $end = $this->validate_input(@$data['end'],FALSE,FALSE,FALSE);
         $vehicle = $this->validate_input(@$data['vehicle'],TRUE,FALSE,FALSE);
+        $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
         $usertype = $this->validate_input(@$data['usertype'],TRUE,FALSE,FALSE);
 
+        if ($this->Model_user_type->is_admin($user)) {
+            $is_approved = TRUE;
+            $approve_datetime = $this->date_time;
+            $approve_id = $user;
+        }
+        else {
+            $is_approved = NULL;
+            $approve_datetime = NULL;
+            $approve_id = NULL;
+        }
+
         if ($this->Model_reservation->is_free($vehicle,$start,$end)) {
-            $price = $this->Model_vehicle->find_price($vehicle, $this->date, $usertype);
-            if (is_null($price)) {
-                $this->output_failed('a');
-            }
-            else {
-                $data = array(
-                    'reservation_start' => $start,
-                    'reservation_end' => $end,
-                    'vehicle_id' => $vehicle,
-                    'price' => $price,
-                    'reservation_datetime' => $this->date_time,
-                    'user_id' => $user,
-                    'user_type_id' => $usertype
-                );
-                $id = $this->Model_reservation->insert($data);
+            $data = array(
+                'reservation_is_approved' => $is_approved,
+                'reservation_approved_datetime' => $approve_datetime,
+                'reservation_approved_id' => $approve_id,
+                'reservation_start' => $start,
+                'reservation_end' => $end,
+                'vehicle_id' => $vehicle,
+                'price' => $price,
+                'reservation_datetime' => $this->date_time,
+                'user_id' => $user,
+                'user_type_id' => $usertype
+            );
+            $id = $this->Model_reservation->insert($data);
 
-                $code = $this->month[intval(date("m"))-1].$id.'-'.date("Y")%2000;
+            $code = $this->month[intval(date("m"))-1].$id.'-'.date("Y")%2000;
 
-                $data = array(
-                    'reservation_code' => $code
-                );
-                $this->Model_reservation->update($data,$id);
+            $data = array(
+                'reservation_code' => $code
+            );
+            $this->Model_reservation->update($data,$id);
 
-                $this->output_ok($code);
-            }
+            $this->output_ok($code);
         }
         else {
             $this->output_failed();

@@ -65,4 +65,11 @@ class Model_user_type extends CI_Model
         if (sizeof($result) > 0) return $result;
         else return NULL;
     }
+
+    public function is_admin($user)
+    {
+        $this->db->where('user_type_id',1);
+        $this->db->where('user_id',$user);
+        return $this->db->count_all_results('user');
+    }
 }
