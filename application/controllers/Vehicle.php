@@ -113,7 +113,7 @@ class Vehicle extends Basic_Controller
         else {
             for($i=0;$i<sizeof($data);$i++) {
                 $data[$i]->feature = $this->Model_vehicle->select_feature($data[$i]->id);
-                $data[$i]->price = $this->Model_vehicle->select_price($data[$i]->id);
+                $data[$i]->prices = $this->Model_vehicle->select_price($data[$i]->id);
             }
             $this->output_ok($data);
         }

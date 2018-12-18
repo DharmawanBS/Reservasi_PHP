@@ -54,6 +54,7 @@ class Model_vehicle extends CI_Model
             vehicle_type as type,
             vehicle_number as number,
             vehicle_status as status,
+            vehicle_price as price,
             (
                 case
                     when jum.jumlah is null || jum.jumlah = 0
