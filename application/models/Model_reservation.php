@@ -34,6 +34,12 @@ class Model_reservation extends CI_Model
         $this->db->update('reservation',$data);
     }
 
+    public function delete($id)
+    {
+        $this->db->where('reservation_id',$id);
+        $this->db->delete('reservation');
+    }
+
     public function is_free($id,$start,$end)
     {
         $this->db->group_start();
@@ -50,19 +56,36 @@ class Model_reservation extends CI_Model
         return $this->db->count_all_results() == 0;
     }
 
+    public function is_waiting_approval($id)
+    {
+        $this->db->where('reservation_id',$id);
+        $this->db->group_start();
+        $this->db->where('reservation_is_approved',NULL);
+        $this->db->where('reservation_approved_datetime',NULL);
+        $this->db->where('reservation_approved_id',NULL);
+        $this->db->group_end();
+        return $this->db->count_all_results() > 0;
+    }
+
     public function select($id, $code, $start, $end, $is_approved)
     {
         $this->db->select(
             'reservation.reservation_id as id,
             reservation.reservation_code as code,
+            reservation.reservation_client_id as code,
+            reservation.reservation_client_name as code,
+            reservation.reservation_client_phone as code,
+            reservation.reservation_destination as code,
+            reservation.reservation_pick_up_location as code,
+            reservation.reservation_notes as code,
             reservation.reservation_start as start,
             reservation.reservation_end as end,
             reservation.reservation_is_approved as app,
             reservation.reservation_approved_datetime as appdate,
             reservation.reservation_approved_id as appuser,
-            reservation.reservation_is_active as active,
             reservation.vehicle_id as vehicle,
             reservation.user_id as user,
+            reservation.user_type_id as user_type_id,
             reservation.price as price,
             reservation.reservation_datetime as created'
         );
@@ -83,6 +106,7 @@ class Model_reservation extends CI_Model
         }
         $this->db->where('reservation.vehicle_id = vehicle.vehicle_id');
         $this->db->where('reservation.user_id = user.user_id');
+        $this->db->where('reservation.reservation_is_active',TRUE);
         $this->db->where('reservation.reservation_approved_id = user.user_id');
         $this->db->from('reservation,vehicle,user');
         $query = $this->db->get();

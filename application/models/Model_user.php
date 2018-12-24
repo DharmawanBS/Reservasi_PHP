@@ -34,6 +34,7 @@ class Model_user extends CI_Model
         $this->db->select(
             'user_id as id,
             user_name as name,
+            user_type_id as type,
             user_status as status'
         );
         if ( ! is_null($id)) {

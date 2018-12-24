@@ -25,13 +25,18 @@ class User extends Basic_Controller
     private function _check_input($user,$id,$name,$key,$password,$type)
     {
         $data = array(
-            'user_key' => $key,
-            'user_password' => $password,
             'user_name' => $name,
             'user_type_id' => $type,
             'user_lastmodified' => $this->date_time,
             'user_lastmodified_id' => $user
         );
+
+        if (! is_null($key)) {
+            $data['user_key'] = $key;
+        }
+        if (! is_null($password)) {
+            $data['user_password'] = $password;
+        }
 
         if (is_null($id)) {
             $data['user_created'] = $this->date_time;
@@ -68,8 +73,8 @@ class User extends Basic_Controller
         $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
         $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
         $name = $this->validate_input(@$data['name'],FALSE,FALSE,FALSE);
-        $key = $this->validate_input(@$data['key'],FALSE,FALSE,FALSE);
-        $password = $this->validate_input(@$data['password'],FALSE,TRUE,FALSE);
+        $key = $this->validate_input(@$data['key'],FALSE,FALSE,TRUE);
+        $password = $this->validate_input(@$data['password'],FALSE,TRUE,TRUE);
         $type = $this->validate_input(@$data['type'],TRUE,TRUE,FALSE);
 
         $id = $this->_check_input($user,$id,$name,$key,$password,$type);
