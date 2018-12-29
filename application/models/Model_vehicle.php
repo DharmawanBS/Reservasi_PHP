@@ -122,11 +122,8 @@ class Model_vehicle extends CI_Model
         else return NULL;
     }
 
-    public function update_price($data,$id)
+    public function update_price($data)
     {
-        $this->db->where('vehicle_id',$id);
-        $this->db->delete('price');
-
         if (sizeof($data) > 0) {
             $this->db->insert_batch('price',$data);
         }
@@ -137,6 +134,8 @@ class Model_vehicle extends CI_Model
         $this->db->select('p.price_price as price, p.price_start as start, p.user_type_id as type_id, u.user_type_name as type_name');
         $this->db->where('p.vehicle_id',$id);
         $this->db->where('p.user_type_id=u.user_type_id');
+        $this->db->order_by('p.user_type_id','asc');
+        $this->db->order_by('p.price_start','desc');
         $this->db->from('price p, user_type u');
         $query = $this->db->get();
         $result = $query->result();

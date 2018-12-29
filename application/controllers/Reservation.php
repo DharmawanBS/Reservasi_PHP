@@ -214,9 +214,15 @@ class Reservation extends Basic_Controller
             $data = array(
                 'id' => $data->id,
                 'code' => $data->code,
+                'client_name' => $data->client_name,
+                'client_phone' => $data->client_phone,
+                'destination' => $data->destination,
+                'pick_up_location' => $data->pick_up_location,
+                'notes' => $data->notes,
                 'start' => $data->start,
                 'end' => $data->end,
-                'vehicle' => $data->vehicle,
+                'vehicle_type' => $data->vehicle_type,
+                'vehicle_number' => $data->vehicle_number,
                 'price' => $data->price,
                 'user' => $data->user,
                 'created' => $data->created

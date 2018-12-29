@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Print Out Booking <?php echo $booking; ?></php></title>
+    <title>Print Out Booking <?php echo $code; ?></php></title>
 
     <style type="text/css">
 
@@ -114,9 +114,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <div id="body">
     <b><h2>Data Reservasi</h2></b>
         <code>
-            Kode Booking : <?php echo $booking; ?><br>
-            Pemesan : <?php echo $name; ?><br>
-            HP : <?php echo $phone; ?><br>
+            Kode Booking : <?php echo $code; ?><br>
+            Pemesan : <?php echo $client_name; ?><br>
+            HP : <?php echo $client_phone; ?><br>
             Tujuan : <?php echo $destination; ?><br>
             Lokasi Jemput : <?php echo $pick_up_location; ?><br>
             Dari tanggal : <?php echo date("d M Y",strtotime($start)); ?><br>
@@ -125,8 +125,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </code>
     <b><h2>Data Kendaraan</h2></b>
         <code>
-            Tipe : <?php echo $type; ?><br>
-            No Polisi : <?php echo $number; ?>
+            Tipe : <?php echo 'aa'.$vehicle_type; ?><br>
+            No Polisi : <?php echo $vehicle_number; ?>
         </code>
     <b><h2>Data Biaya</h2></b>
         <code>

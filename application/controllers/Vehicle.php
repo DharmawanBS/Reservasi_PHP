@@ -71,8 +71,14 @@ class Vehicle extends Basic_Controller
         $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
         $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
+        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,TRUE);
 
         $id = $this->_check_input($user,NULL,$type,$number,$price,$feature);
+
+        if (! is_null($prices)) {
+            $data = $this->_price_post($user, $id, $prices);
+            $this->Model_vehicle->update_price($data);
+        }
 
         $this->output_ok($id);
     }
@@ -87,8 +93,14 @@ class Vehicle extends Basic_Controller
         $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
         $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
+        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,TRUE);
 
         $id = $this->_check_input($user,$id,$type,$number,$price,$feature);
+
+        if (! is_null($prices)) {
+            $data = $this->_price_post($user, $id, $prices);
+            $this->Model_vehicle->update_price($data);
+        }
 
         $this->output_ok($id);
     }
@@ -142,7 +154,7 @@ class Vehicle extends Basic_Controller
 
         $data = $this->_price_post($user,$id,$prices);
 
-        $this->Model_vehicle->update_price($data,$id);
+        $this->Model_vehicle->update_price($data);
 
         $this->output_ok(NULL);
     }
