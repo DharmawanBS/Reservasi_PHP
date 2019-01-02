@@ -30,24 +30,24 @@ class Model_vehicle extends CI_Model
         $this->db->update('vehicle',$data);
     }
 
-    private function _status($date)
+    private function _status($date_start,$date_end)
     {
         $this->db->select(
             'vehicle_id as vehicle,
             count(*) as jumlah'
         );
         $this->db->group_start();
-        $this->db->where('reservation_start >=',$date);
-        $this->db->where('reservation_start <=',$date);
+        $this->db->where('reservation_start >=',$date_start);
+        $this->db->where('reservation_start <=',$date_end);
         $this->db->group_end();
         $this->db->from('reservation');
         $this->db->group_by('vehicle_id');
         return $this->db->get_compiled_select();
     }
 
-    public function select($id,$is_free,$date,$status)
+    public function select($id, $is_free, $date_start, $date_end, $status)
     {
-        $count = $this->_status($date);
+        $count = $this->_status($date_start,$date_end);
 
         $this->db->select(
             'vehicle_id as id,

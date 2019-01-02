@@ -125,7 +125,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </code>
     <b><h2>Data Kendaraan</h2></b>
         <code>
-            Tipe : <?php echo 'aa'.$vehicle_type; ?><br>
+            Tipe : <?php echo $vehicle_type; ?><br>
             No Polisi : <?php echo $vehicle_number; ?>
         </code>
     <b><h2>Data Biaya</h2></b>
@@ -138,6 +138,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $interval = date_diff($datetime1, $datetime2);
 
                 $duration = $interval->format("%a")+1;
+            ?>
+            Total Hari : <?php echo $duration; ?> Hari<br>
+            Total Biaya : Rp <?php echo $price*$duration; ?>,-
+        </code>
+    <b><h2>Crew</h2></b>
+        <code>
+            Biaya per Hari : Rp <?php echo $price; ?>,-<br>
+            <?php
+            $datetime1 = date_create($start);
+            $datetime2 = date_create($end);
+
+            $interval = date_diff($datetime1, $datetime2);
+
+            $duration = $interval->format("%a")+1;
             ?>
             Total Hari : <?php echo $duration; ?> Hari<br>
             Total Biaya : Rp <?php echo $price*$duration; ?>,-

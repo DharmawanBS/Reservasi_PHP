@@ -23,11 +23,6 @@ class Model_reservation extends CI_Model
         return $this->db->insert_id();
     }
 
-    public function insert_crew($data)
-    {
-        $this->db->insert_batch('crew',$data);
-    }
-
     public function update($data,$id)
     {
         $this->db->where('reservation_id',$id);
@@ -111,6 +106,22 @@ class Model_reservation extends CI_Model
         $this->db->where('reservation.reservation_is_active',TRUE);
         $this->db->where('reservation.reservation_approved_id = user.user_id');
         $this->db->from('reservation,vehicle,user');
+        $query = $this->db->get();
+        $result = $query->result();
+        if (sizeof($result) > 0) return $result;
+        else return NULL;
+    }
+
+    public function insert_crew($data)
+    {
+        $this->db->insert_batch('crew',$data);
+    }
+
+    public function select_crew($id)
+    {
+        $this->db->where('reservation_id',$id);
+        $this->db->from('crew');
+        $this->db->order_by('crew_status','asc');
         $query = $this->db->get();
         $result = $query->result();
         if (sizeof($result) > 0) return $result;

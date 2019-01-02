@@ -210,6 +210,8 @@ class Reservation extends Basic_Controller
             $this->load->view('failed');
         }
         else {
+            $crew = $this->Model_reservation->select_crew($id);
+
             $data = $data[0];
             $data = array(
                 'id' => $data->id,
@@ -225,7 +227,8 @@ class Reservation extends Basic_Controller
                 'vehicle_number' => $data->vehicle_number,
                 'price' => $data->price,
                 'user' => $data->user,
-                'created' => $data->created
+                'created' => $data->created,
+                'crew' => $crew
             );
             $this->load->view('print',$data);
         }

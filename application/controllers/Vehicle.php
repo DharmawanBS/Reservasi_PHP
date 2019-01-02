@@ -111,14 +111,16 @@ class Vehicle extends Basic_Controller
         $data = json_decode(file_get_contents('php://input'), TRUE);
         $id = $this->validate_input(@$data['id'],TRUE,FALSE,TRUE);
         $is_free = $this->validate_input(@$data['is_free'],FALSE,FALSE,TRUE);
-        $date = $this->validate_input(@$data['date'],FALSE,FALSE,TRUE);
+        $date_start = $this->validate_input(@$data['date_start'],FALSE,FALSE,TRUE);
+        $date_end = $this->validate_input(@$data['date_end'],FALSE,FALSE,TRUE);
         $status = $this->validate_input(@$data['status'],FALSE,FALSE,TRUE);
 
         if ( ! is_bool($is_free)) $is_free = NULL;
         if ( ! is_bool($status)) $status = NULL;
-        if (is_null($date)) $date = $this->date_time;
+        if (is_null($date_start)) $date_start = $this->date_time;
+        if (is_null($date_end)) $date_end = $this->date_time;
 
-        $data = $this->Model_vehicle->select($id,$is_free,$date,$status);
+        $data = $this->Model_vehicle->select($id,$is_free,$date_start,$date_end,$status);
         if (is_null($data)) {
             $this->output_empty();
         }
