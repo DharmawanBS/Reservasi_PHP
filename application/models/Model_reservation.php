@@ -38,6 +38,7 @@ class Model_reservation extends CI_Model
     public function is_free($id,$start,$end)
     {
         $this->db->group_start();
+        $this->db->group_start();
         $this->db->where('reservation_start >=',$start);
         $this->db->where('reservation_start <=',$end);
         $this->db->group_end();
@@ -45,7 +46,9 @@ class Model_reservation extends CI_Model
         $this->db->where('reservation_end >=',$start);
         $this->db->where('reservation_end <=',$end);
         $this->db->group_end();
+        $this->db->group_end();
         $this->db->where('reservation_is_approved',1);
+        $this->db->where('reservation_is_cancel',NULL);
         $this->db->where('vehicle_id',$id);
         $this->db->from('reservation');
         return $this->db->count_all_results() == 0;
@@ -55,6 +58,9 @@ class Model_reservation extends CI_Model
     {
         $this->db->where('reservation_id',$id);
         $this->db->group_start();
+        $this->db->where('reservation_is_cancel',NULL);
+        $this->db->where('reservation_cancel_datetime',NULL);
+        $this->db->where('reservation_cancel_id',NULL);
         $this->db->where('reservation_is_approved',NULL);
         $this->db->where('reservation_approved_datetime',NULL);
         $this->db->where('reservation_approved_id',NULL);
@@ -62,7 +68,14 @@ class Model_reservation extends CI_Model
         return $this->db->count_all_results() > 0;
     }
 
-    public function select($id, $code, $start, $end, $is_approved)
+    public function is_before_date($id)
+    {
+        $this->db->where('reservation_id',$id);
+        $this->db->where('reservation_start <=',$this->date_time);
+        return $this->db->count_all_results() > 0;
+    }
+
+    public function select($id, $code, $start, $end, $is_approved, $is_cancel)
     {
         $this->db->select(
             'reservation.reservation_id as id,
@@ -78,6 +91,9 @@ class Model_reservation extends CI_Model
             reservation.reservation_is_approved as is_approved,
             reservation.reservation_approved_datetime as approved_datetime,
             reservation.reservation_approved_id as approved_by,
+            reservation.reservation_is_cancel as is_cancel,
+            reservation.reservation_cancel_datetime as cancel_datetime,
+            reservation.reservation_cancel_id as cancel_by,
             reservation.vehicle_id as vehicle_id,
             vehicle.vehicle_type as vehicle_type,
             vehicle.vehicle_number as vehicle_number,
@@ -100,6 +116,9 @@ class Model_reservation extends CI_Model
         }
         if ( ! is_null($is_approved)) {
             $this->db->where('reservation.reservation_is_approved',$is_approved);
+        }
+        if ( ! is_null($is_cancel)) {
+            $this->db->where('reservation.reservation_is_cancel',$is_cancel);
         }
         $this->db->where('reservation.vehicle_id = vehicle.vehicle_id');
         $this->db->where('reservation.user_id = user.user_id');

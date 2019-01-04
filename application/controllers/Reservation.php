@@ -49,8 +49,9 @@ class Reservation extends Basic_Controller
         $start = $this->validate_input(@$data['start'],FALSE,FALSE,TRUE);
         $end = $this->validate_input(@$data['end'],FALSE,FALSE,TRUE);
         $is_approved = $this->validate_input(@$data['is_approved'],FALSE,FALSE,TRUE);
+        $is_cancel = $this->validate_input(@$data['is_cancel'],FALSE,FALSE,TRUE);
 
-        $data = $this->Model_reservation->select($id,$code,$start,$end,$is_approved);
+        $data = $this->Model_reservation->select($id,$code,$start,$end,$is_approved,$is_cancel);
 
         if (is_null($data)) {
             $this->output_empty();
@@ -200,11 +201,31 @@ class Reservation extends Basic_Controller
         }
     }
 
+    public function cancel_post()
+    {
+        //  get input data
+        $data = json_decode(file_get_contents('php://input'), TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+
+        if ($this->Model_reservation->is_before_date($id)) {
+            $data = array(
+                'reservation_cancel_datetime' => $this->date_time,
+                'reservation_is_cancel' => TRUE,
+                'reservation_cancel_id' => $user
+            );
+            $this->Model_reservation->update($data, $id);
+        }
+        else {
+            $this->output_failed();
+        }
+    }
+
     public function print_get()
     {
         $id = $this->input->get('id');
 
-        $data = $this->Model_reservation->select($id,NULL,NULL,NULL, TRUE);
+        $data = $this->Model_reservation->select($id,NULL,NULL,NULL, TRUE,NULL);
 
         if (is_null($data)) {
             $this->load->view('failed');
