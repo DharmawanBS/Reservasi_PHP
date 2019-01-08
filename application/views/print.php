@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Print Out Booking <?php echo $code; ?></php></title>
+    <title>Print Out Booking <?php echo $code; ?></title>
 
     <style type="text/css">
 
@@ -105,65 +105,75 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <body>
 
 <page size="A4">
-<div id="container">
-    <center>
-    <h1>PRINT OUT TIKET PEMESANAN KENDARAAN</h1>
-    </center>
-    <h4 align="right">PT Dharmawan Merdeka<br>Jln. Mawar no 23, Kecamatan Delod Peken<br>Kabupaten Tabanan, Bali 82113</h4>
+    <div id="container">
+        <center>
+            <h1>PRINT OUT TIKET PEMESANAN KENDARAAN</h1>
+        </center>
+        <h4 align="right">PT Dharmawan Merdeka<br>Jln. Mawar no 23, Kecamatan Delod Peken<br>Kabupaten Tabanan, Bali 82113</h4>
 
-    <div id="body">
-    <b><h2>Data Reservasi</h2></b>
-        <code>
-            Kode Booking : <?php echo $code; ?><br>
-            Pemesan : <?php echo $client_name; ?><br>
-            HP : <?php echo $client_phone; ?><br>
-            Tujuan : <?php echo $destination; ?><br>
-            Lokasi Jemput : <?php echo $pick_up_location; ?><br>
-            Dari tanggal : <?php echo date("d M Y",strtotime($start)); ?><br>
-            Sampai tanggal : <?php echo date("d M Y",strtotime($end)); ?><br>
-            Catatan : <?php echo $notes; ?>
-        </code>
-    <b><h2>Data Kendaraan</h2></b>
-        <code>
-            Tipe : <?php echo $vehicle_type; ?><br>
-            No Polisi : <?php echo $vehicle_number; ?>
-        </code>
-    <b><h2>Data Biaya</h2></b>
-        <code>
-            Biaya per Hari : Rp <?php echo $price; ?>,-<br>
-            <?php
-                $datetime1 = date_create($start);
-                $datetime2 = date_create($end);
-
-                $interval = date_diff($datetime1, $datetime2);
-
-                $duration = $interval->format("%a")+1;
-            ?>
-            Total Hari : <?php echo $duration; ?> Hari<br>
-            Total Biaya : Rp <?php echo $price*$duration; ?>,-
-        </code>
-    <b><h2>Crew</h2></b>
-        <code>
-            Biaya per Hari : Rp <?php echo $price; ?>,-<br>
-            <?php
-            $datetime1 = date_create($start);
-            $datetime2 = date_create($end);
-
-            $interval = date_diff($datetime1, $datetime2);
-
-            $duration = $interval->format("%a")+1;
-            ?>
-            Total Hari : <?php echo $duration; ?> Hari<br>
-            Total Biaya : Rp <?php echo $price*$duration; ?>,-
-        </code>
+        <div id="body">
+            <b><h2>Data Reservasi</h2></b>
+            <code>
+                Kode Booking : <?php echo $code; ?><br>
+                Pemesan : <?php echo $client_name; ?><br>
+                HP : <?php echo $client_phone; ?><br>
+                Tujuan : <?php echo $destination; ?><br>
+                Lokasi Jemput : <?php echo $pick_up_location; ?><br>
+                Dari tanggal : <?php echo date("d M Y",strtotime($start)); ?><br>
+                Sampai tanggal : <?php echo date("d M Y",strtotime($end)); ?><br>
+                Catatan : <?php echo $notes; ?>
+            </code>
+            <b><h2>Data Kendaraan</h2></b>
+            <code>
+                Tipe : <?php echo $vehicle_type; ?><br>
+                No Polisi : <?php echo $vehicle_number; ?>
+            </code>
+            <b><h2>Data Biaya</h2></b>
+            <code>
+                Biaya per Hari : Rp <?php echo $price; ?>,-<br>
+                Total Hari : <?php echo $duration; ?> Hari<br>
+                Total Biaya : Rp <?php echo $price*$duration; ?>,-
+            </code>
+            <b><h2>Crew</h2></b>
+            <code>
+                <?php
+                $crew_status = NULL;
+                $crew_name = array();
+                foreach($crew as $item) {
+                    if ($crew_status === null) {
+                        $crew_status = $item->crew_status;
+                        $crew_name[] = $item->crew_name;
+                    }
+                    else if ($crew_status == $item->crew_status) {
+                        $crew_name[] = $item->crew_name;
+                    }
+                    else {
+                        echo $crew_status.' : ';
+                        for($i=0, $iMax = count($crew_name); $i< $iMax; $i++) {
+                            if ($i != 0) echo ' ,';
+                            echo $crew_name[$i];
+                        }
+                        echo '<br>';
+                        $crew_status = $item->crew_status;
+                        $crew_name = array();
+                        $crew_name[] = $item->crew_name;
+                    }
+                }
+                echo $crew_status.' : ';
+                for($i=0, $iMax = count($crew_name); $i< $iMax; $i++) {
+                    if ($i != 0) echo ' ,';
+                    echo $crew_name[$i];
+                }
+                ?>
+            </code>
+        </div>
+        <p class="footer">
+            Tabanan, <?php echo date("d M Y",strtotime($created)); ?>
+            <br>
+            <br>
+            (Dharmawan)
+        </p>
     </div>
-    <p class="footer">
-        Tabanan, <?php echo date("d M Y",strtotime($created)); ?>
-        <br>
-        <br>
-        (Dharmawan)
-    </p>
-</div>
 </page>
 
 </body>

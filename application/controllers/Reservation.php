@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 06-Dec-18
  * Time: 10:15 PM
  */
@@ -46,24 +46,54 @@ class Reservation extends Basic_Controller
         $data = json_decode(file_get_contents('php://input'), TRUE);
         $id = $this->validate_input(@$data['id'],TRUE,FALSE,TRUE);
         $code = $this->validate_input(@$data['code'],FALSE,FALSE,TRUE);
+        $vehicle = $this->validate_input(@$data['vehicle'],TRUE,FALSE,TRUE);
         $start = $this->validate_input(@$data['start'],FALSE,FALSE,TRUE);
         $end = $this->validate_input(@$data['end'],FALSE,FALSE,TRUE);
         $is_approved = $this->validate_input(@$data['is_approved'],FALSE,FALSE,TRUE);
         $is_cancel = $this->validate_input(@$data['is_cancel'],FALSE,FALSE,TRUE);
+        $past_time = $this->validate_input(@$data['past_time'],FALSE,FALSE,TRUE);
+        $future_date = $this->validate_input(@$data['future_time'],FALSE,FALSE,TRUE);
 
-        $data = $this->Model_reservation->select($id,$code,$start,$end,$is_approved,$is_cancel);
+        if ( ! is_bool($past_time)) $past_time = NULL;
+        if ( ! is_bool($future_date)) $future_date = NULL;
 
-        if (is_null($data)) {
+        if ($past_time === TRUE) {
+            $temp_end = date("Y-m-d", strtotime($this->date ."- 1 day"));
+            if ($end === null) $end = $temp_end;
+            else {
+                if ($end > $temp_end) $end = $temp_end;
+            }
+        }
+        if ($future_date === TRUE) {
+            $temp_start = $this->date;
+            if ($start === null) $start = $temp_start;
+            else {
+                if ($start > $temp_start) $start = $temp_start;
+            }
+        }
+        if ( $start !== null AND $end !== null) {
+            if ($end < $start) {
+                $start = NULL;
+                $end = NULL;
+            }
+        }
+
+        $data = $this->Model_reservation->select($id,$code,$vehicle,$start,$end,$is_approved,$is_cancel);
+
+        if ($data === null) {
             $this->output_empty();
         }
         else {
+            for($i=0, $iMax = count($data); $i< $iMax; $i++) {
+                $data[$i]->crew = $this->Model_reservation->select_crew($data[$i]->id);
+            }
             $this->output_ok($data);
         }
     }
 
     private function _need_crew($crew,$id)
     {
-        if(sizeof($crew) == 0) {
+        if(count($crew) == 0) {
             $this->Model_reservation->delete($id);
             $this->output_invalid();
         }
@@ -73,7 +103,7 @@ class Reservation extends Basic_Controller
             $name = $this->validate_input(@$item['name'],FALSE,FALSE,TRUE);
             $status = $this->validate_input(@$item['status'],FALSE,FALSE,TRUE);
 
-            if (is_null($name) || is_null($status)) {
+            if ($name === null || $status === null) {
                 $this->Model_reservation->delete($id);
                 $this->output_invalid();
             }
@@ -83,7 +113,7 @@ class Reservation extends Basic_Controller
                 'crew_name' => $name,
                 'crew_status' => $status
             );
-            array_push($list_crew, $temp);
+            $list_crew[] = $temp;
         }
         $this->Model_reservation->insert_crew($list_crew);
     }
@@ -92,17 +122,17 @@ class Reservation extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
         $client_id = $this->validate_input(@$data['client_id'],TRUE,FALSE,TRUE);
-        $client_name = $this->validate_input(@$data['client_name'],FALSE,FALSE,FALSE);
-        $client_phone = $this->validate_input(@$data['client_phone'],FALSE,FALSE,FALSE);
-        $destination = $this->validate_input(@$data['destination'],FALSE,FALSE,FALSE);
-        $pick_up_location = $this->validate_input(@$data['pick_up_location'],FALSE,FALSE,FALSE);
-        $start = $this->validate_input(@$data['start'],FALSE,FALSE,FALSE);
-        $end = $this->validate_input(@$data['end'],FALSE,FALSE,FALSE);
-        $vehicle = $this->validate_input(@$data['vehicle'],TRUE,FALSE,FALSE);
-        $notes = $this->validate_input(@$data['notes'],FALSE,FALSE,FALSE);
-        $price = $this->validate_input(@$data['price'],FALSE,FALSE,FALSE);
+        $client_name = $this->validate_input(@$data['client_name']);
+        $client_phone = $this->validate_input(@$data['client_phone']);
+        $destination = $this->validate_input(@$data['destination']);
+        $pick_up_location = $this->validate_input(@$data['pick_up_location']);
+        $start = $this->validate_input(@$data['start']);
+        $end = $this->validate_input(@$data['end']);
+        $vehicle = $this->validate_input(@$data['vehicle'],TRUE);
+        $notes = $this->validate_input(@$data['notes']);
+        $price = $this->validate_input(@$data['price']);
         $user_type_id = $this->validate_input(@$data['user_type_id'],TRUE,FALSE,TRUE);
         $crew = $this->validate_input(@$data['crew'],FALSE,TRUE,TRUE);
 
@@ -111,7 +141,7 @@ class Reservation extends Basic_Controller
             $approve_datetime = $this->date_time;
             $approve_id = $user;
 
-            if (is_null($crew) || (is_array($crew) AND sizeof($crew) == 0)) $this->output_invalid();
+            if ($crew === null || (is_array($crew) AND count($crew) == 0)) $this->output_invalid();
         }
         else {
             $is_approved = NULL;
@@ -140,7 +170,7 @@ class Reservation extends Basic_Controller
             );
             $id = $this->Model_reservation->insert($data);
 
-            $code = $this->month[intval(date("m"))-1].$id.'-'.date("Y")%2000;
+            $code = $this->month[(int)date("m") -1].$id.'-'.date("Y")%2000;
 
             $data = array(
                 'reservation_code' => $code
@@ -148,7 +178,7 @@ class Reservation extends Basic_Controller
             $this->Model_reservation->update($data,$id);
 
             if ($is_approved) {
-                $this->_need_crew($data,$id);
+                $this->_need_crew($crew,$id);
             }
 
             $this->output_ok($code);
@@ -162,9 +192,9 @@ class Reservation extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $crew = $this->validate_input(@$data['crew'],FALSE,TRUE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $crew = $this->validate_input(@$data['crew'],FALSE,TRUE);
 
         if ($this->Model_reservation->is_waiting_approval($id)) {
             $this->_need_crew($crew, $id);
@@ -175,6 +205,7 @@ class Reservation extends Basic_Controller
                 'reservation_approved_id' => $user
             );
             $this->Model_reservation->update($data, $id);
+            $this->output_ok(NULL);
         }
         else {
             $this->output_failed();
@@ -185,8 +216,8 @@ class Reservation extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE);
 
         if ($this->Model_reservation->is_waiting_approval($id)) {
             $data = array(
@@ -195,6 +226,7 @@ class Reservation extends Basic_Controller
                 'reservation_approved_id' => $user
             );
             $this->Model_reservation->update($data, $id);
+            $this->output_ok(NULL);
         }
         else {
             $this->output_failed();
@@ -205,8 +237,8 @@ class Reservation extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE);
 
         if ($this->Model_reservation->is_before_date($id)) {
             $data = array(
@@ -215,6 +247,7 @@ class Reservation extends Basic_Controller
                 'reservation_cancel_id' => $user
             );
             $this->Model_reservation->update($data, $id);
+            $this->output_ok(NULL);
         }
         else {
             $this->output_failed();
@@ -225,9 +258,9 @@ class Reservation extends Basic_Controller
     {
         $id = $this->input->get('id');
 
-        $data = $this->Model_reservation->select($id,NULL,NULL,NULL, TRUE,NULL);
+        $data = $this->Model_reservation->select($id,NULL,NULL, NULL,NULL, TRUE,NULL);
 
-        if (is_null($data)) {
+        if ($data === null) {
             $this->load->view('failed');
         }
         else {
@@ -244,6 +277,7 @@ class Reservation extends Basic_Controller
                 'notes' => $data->notes,
                 'start' => $data->start,
                 'end' => $data->end,
+                'duration' => $data->duration,
                 'vehicle_type' => $data->vehicle_type,
                 'vehicle_number' => $data->vehicle_number,
                 'price' => $data->price,

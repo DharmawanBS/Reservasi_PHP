@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 06-Dec-18
  * Time: 9:15 PM
  */
@@ -31,7 +31,7 @@ class Vehicle extends Basic_Controller
             'vehicle_lastmodified_id' => $user
         );
 
-        if (is_null($id)) {
+        if ($id === null) {
             $data['vehicle_created'] = $this->date_time;
             $data['vehicle_created_id'] = $user;
             $data['vehicle_is_active'] = TRUE;
@@ -42,19 +42,19 @@ class Vehicle extends Basic_Controller
         }
 
         $features = array();
-        if (! is_null($feature)) {
+        if ($feature !== null) {
             foreach ($feature as $key => $value) {
                 $key = $this->validate_input($key, FALSE, FALSE, TRUE);
                 $value = $this->validate_input($value, FALSE, FALSE, TRUE);
 
-                if (is_null($key) || is_null($value)) continue;
+                if ($key === null || $value === null) continue;
                 else {
                     $temp = array(
                         'vehicle_feature_id' => $id,
                         'vehicle_feature_key' => $key,
                         'vehicle_feature_value' => $value,
                     );
-                    array_push($features, $temp);
+                    $features[] = $temp;
                 }
             }
         }
@@ -66,16 +66,16 @@ class Vehicle extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $type = $this->validate_input(@$data['type'],FALSE,FALSE,FALSE);
-        $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
-        $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $type = $this->validate_input(@$data['type']);
+        $number = $this->validate_input(@$data['number']);
+        $price = $this->validate_input(@$data['price'],TRUE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
         $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,TRUE);
 
         $id = $this->_check_input($user,NULL,$type,$number,$price,$feature);
 
-        if (! is_null($prices)) {
+        if ($prices !== null) {
             $data = $this->_price_post($user, $id, $prices);
             $this->Model_vehicle->update_price($data);
         }
@@ -87,17 +87,17 @@ class Vehicle extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $type = $this->validate_input(@$data['type'],FALSE,FALSE,FALSE);
-        $number = $this->validate_input(@$data['number'],FALSE,FALSE,FALSE);
-        $price = $this->validate_input(@$data['price'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $type = $this->validate_input(@$data['type']);
+        $number = $this->validate_input(@$data['number']);
+        $price = $this->validate_input(@$data['price'],TRUE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
         $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,TRUE);
 
         $id = $this->_check_input($user,$id,$type,$number,$price,$feature);
 
-        if (! is_null($prices)) {
+        if ($prices !== null) {
             $data = $this->_price_post($user, $id, $prices);
             $this->Model_vehicle->update_price($data);
         }
@@ -117,15 +117,15 @@ class Vehicle extends Basic_Controller
 
         if ( ! is_bool($is_free)) $is_free = NULL;
         if ( ! is_bool($status)) $status = NULL;
-        if (is_null($date_start)) $date_start = $this->date_time;
-        if (is_null($date_end)) $date_end = $this->date_time;
+        if ($date_start === null) $date_start = $this->date_time;
+        if ($date_end === null) $date_end = $this->date_time;
 
         $data = $this->Model_vehicle->select($id,$is_free,$date_start,$date_end,$status);
-        if (is_null($data)) {
+        if ($data === null) {
             $this->output_empty();
         }
         else {
-            for($i=0;$i<sizeof($data);$i++) {
+            for($i=0, $iMax = count($data); $i< $iMax; $i++) {
                 $data[$i]->feature = $this->Model_vehicle->select_feature($data[$i]->id);
                 $data[$i]->prices = $this->Model_vehicle->select_price($data[$i]->id);
             }
@@ -137,7 +137,7 @@ class Vehicle extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
 
         $data = array(
             'vehicle_is_active' => FALSE
@@ -150,9 +150,9 @@ class Vehicle extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,FALSE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE);
 
         $data = $this->_price_post($user,$id,$prices);
 
@@ -166,9 +166,9 @@ class Vehicle extends Basic_Controller
         $data = array();
         foreach ($prices as $item)
         {
-            $price = $this->validate_input(@$item['price'],TRUE,FALSE,FALSE);
-            $start = $this->validate_input(@$item['start'],FALSE,FALSE,FALSE);
-            $usertype = $this->validate_input(@$item['usertype'],TRUE,FALSE,FALSE);
+            $price = $this->validate_input(@$item['price'],TRUE);
+            $start = $this->validate_input(@$item['start']);
+            $usertype = $this->validate_input(@$item['usertype'],TRUE);
 
             $temp = array(
                 'price_price' => $price,
@@ -178,7 +178,7 @@ class Vehicle extends Basic_Controller
                 'price_created' => $this->date_time,
                 'price_created_id' => $user
             );
-            array_push($data,$temp);
+            $data[] = $temp;
         }
         return $data;
     }
@@ -187,8 +187,8 @@ class Vehicle extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE);
 
         $data = array(
             'vehicle_lastmodified' => $this->date_time,
@@ -204,8 +204,8 @@ class Vehicle extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE);
 
         $data = array(
             'vehicle_lastmodified' => $this->date_time,
@@ -221,8 +221,8 @@ class Vehicle extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user_type = $this->validate_input(@$data['user_type'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user_type = $this->validate_input(@$data['user_type'],TRUE);
 
         $prices = $this->Model_vehicle->find_price($id,$this->date,$user_type);
         if ($prices) {

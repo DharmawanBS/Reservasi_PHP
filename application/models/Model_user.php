@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 06-Dec-18
  * Time: 9:15 PM
  */
@@ -37,17 +37,27 @@ class Model_user extends CI_Model
             user_type_id as type,
             user_status as status'
         );
-        if ( ! is_null($id)) {
+        if ($id !== null) {
             $this->db->where('user_id',$id);
         }
-        if ( ! is_null($status)) {
+        if ($status !== null) {
             $this->db->where('user_status',$status);
         }
         $this->db->where('user_is_active',1);
         $this->db->from('user');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result;
+        if (count($result) > 0) return $result;
         else return NULL;
+    }
+
+    public function already_used($id,$key, $availability)
+    {
+        if ($id !== null) {
+            $this->db->where('user_id', $id);
+        }
+        $this->db->where('user_key',$key);
+        $this->db->where('user_is_active',TRUE);
+        return $this->db->count_all_results() > $availability;
     }
 }

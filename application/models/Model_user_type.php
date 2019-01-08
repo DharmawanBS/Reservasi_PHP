@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 06-Dec-18
  * Time: 9:15 PM
  */
@@ -55,14 +55,14 @@ class Model_user_type extends CI_Model
                 end
             ) as jumlah'
         );
-        if ( ! is_null($id)) {
+        if ($id !== null) {
             $this->db->where('user_type_id',$id);
         }$this->db->where('user_type_is_active',1);
         $this->db->from('user_type');
         $this->db->join('('.$count.') jum','jum.id = user_type.user_type_id','left');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result;
+        if (count($result) > 0) return $result;
         else return NULL;
     }
 

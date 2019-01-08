@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 06-Dec-18
  * Time: 9:15 PM
  */
@@ -63,10 +63,10 @@ class Model_vehicle extends CI_Model
                 end
             ) as is_free'
         );
-        if ( ! is_null($status)) {
+        if ($status !== null) {
             $this->db->where('vehicle_status',$status);
         }
-        if ( ! is_null($id)) {
+        if ($id !== null) {
             $this->db->where('vehicle_id',$id);
         }
         $this->db->where('vehicle_is_active',1);
@@ -80,7 +80,7 @@ class Model_vehicle extends CI_Model
         }
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result;
+        if (count($result) > 0) return $result;
         else return NULL;
     }
 
@@ -89,7 +89,7 @@ class Model_vehicle extends CI_Model
         $this->db->where('vehicle_feature_id',$id);
         $this->db->delete('vehicle_feature');
 
-        if (sizeof($data) > 0) {
+        if (count($data) > 0) {
             $this->db->insert_batch('vehicle_feature',$data);
         }
     }
@@ -104,7 +104,7 @@ class Model_vehicle extends CI_Model
         $this->db->from('vehicle_feature');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result;
+        if (count($result) > 0) return $result;
         else return NULL;
     }
 
@@ -118,13 +118,13 @@ class Model_vehicle extends CI_Model
         $this->db->join('price',"vehicle.vehicle_id = price.vehicle_id AND price.user_type_id = ".$user_type." AND price.price_start <= '".$date."'",'left');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result[0];
+        if (count($result) > 0) return $result[0];
         else return NULL;
     }
 
     public function update_price($data)
     {
-        if (sizeof($data) > 0) {
+        if (count($data) > 0) {
             $this->db->insert_batch('price',$data);
         }
     }
@@ -139,7 +139,7 @@ class Model_vehicle extends CI_Model
         $this->db->from('price p, user_type u');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result;
+        if (count($result) > 0) return $result;
         else return NULL;
     }
 }

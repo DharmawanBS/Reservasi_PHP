@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 06-Dec-18
  * Time: 10:24 PM
  */
@@ -65,17 +65,19 @@ class Model_reservation extends CI_Model
         $this->db->where('reservation_approved_datetime',NULL);
         $this->db->where('reservation_approved_id',NULL);
         $this->db->group_end();
+        $this->db->from('reservation');
         return $this->db->count_all_results() > 0;
     }
 
     public function is_before_date($id)
     {
         $this->db->where('reservation_id',$id);
-        $this->db->where('reservation_start <=',$this->date_time);
+        $this->db->where('reservation_start >=',$this->date_time);
+        $this->db->from('reservation');
         return $this->db->count_all_results() > 0;
     }
 
-    public function select($id, $code, $start, $end, $is_approved, $is_cancel)
+    public function select($id, $code, $vehicle, $start, $end, $is_approved, $is_cancel)
     {
         $this->db->select(
             'reservation.reservation_id as id,
@@ -88,6 +90,7 @@ class Model_reservation extends CI_Model
             reservation.reservation_notes as notes,
             reservation.reservation_start as start,
             reservation.reservation_end as end,
+            datediff(reservation.reservation_end,reservation.reservation_start) as duration,
             reservation.reservation_is_approved as is_approved,
             reservation.reservation_approved_datetime as approved_datetime,
             reservation.reservation_approved_id as approved_by,
@@ -102,32 +105,36 @@ class Model_reservation extends CI_Model
             reservation.price as price,
             reservation.reservation_datetime as created'
         );
-        if ( ! is_null($id)) {
+        if ($id !== null) {
             $this->db->where('reservation.reservation_id',$id);
         }
-        if ( ! is_null($code)) {
+        if ($code !== null) {
             $this->db->like('LOWER(reservation.reservation_code)',strtolower($code));
         }
-        if ( ! is_null($start)) {
+        if ($code !== null) {
+            $this->db->like('LOWER(reservation.vehicle_id)',$vehicle);
+        }
+        if ($start !== null) {
             $this->db->where('reservation.reservation_start >=',$start);
         }
-        if ( ! is_null($end)) {
+        if ($end !== null) {
             $this->db->where('reservation.reservation_end <=',$end);
         }
-        if ( ! is_null($is_approved)) {
+        if ($is_approved !== null) {
             $this->db->where('reservation.reservation_is_approved',$is_approved);
         }
-        if ( ! is_null($is_cancel)) {
+        if ($is_cancel !== null) {
             $this->db->where('reservation.reservation_is_cancel',$is_cancel);
         }
         $this->db->where('reservation.vehicle_id = vehicle.vehicle_id');
         $this->db->where('reservation.user_id = user.user_id');
         $this->db->where('reservation.reservation_is_active',TRUE);
         $this->db->where('reservation.reservation_approved_id = user.user_id');
+        $this->db->order_by('reservation.reservation_start','asc');
         $this->db->from('reservation,vehicle,user');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result;
+        if (count($result) > 0) return $result;
         else return NULL;
     }
 
@@ -143,7 +150,7 @@ class Model_reservation extends CI_Model
         $this->db->order_by('crew_status','asc');
         $query = $this->db->get();
         $result = $query->result();
-        if (sizeof($result) > 0) return $result;
+        if (count($result) > 0) return $result;
         else return NULL;
     }
 }

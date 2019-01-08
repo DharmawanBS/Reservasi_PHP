@@ -36,7 +36,7 @@ class Basic_Controller extends REST_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->access();
+        self::access();
 
         //  set default date time
         date_default_timezone_set('Asia/Jakarta');
@@ -51,7 +51,7 @@ class Basic_Controller extends REST_Controller
         header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, token, refresh_token, Authorization");
         header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
         $method = $_SERVER['REQUEST_METHOD'];
-        if ($method == "OPTIONS") {
+        if ($method === "OPTIONS") {
             die();
         }
     }
@@ -130,7 +130,11 @@ class Basic_Controller extends REST_Controller
      */
     public function output($msg, $data, $meta = NULL)
     {
-        if (is_null($meta)) $meta = $this->meta(is_null($data) ? 0 : (is_array($data) ? sizeof($data) : 1),FALSE,NULL);
+        if ($meta === null) if ($data === null) {
+            $meta = $this->meta(0, FALSE, NULL);
+        } else {
+            $meta = $this->meta((is_array($data) ? count($data) : 1), FALSE, NULL);
+        }
         return array(
             'msg' => $msg,
             'data' => $data,
@@ -153,7 +157,7 @@ class Basic_Controller extends REST_Controller
             'count_all' => $all,
             'count' => $count,
             'allow_pagination' => $allow_pagination,
-            'using_pagination' => ! is_null($page),
+            'using_pagination' => $page !== null,
             'data_per_pagination' => $allow_pagination ? self::PAGING : 0,
             'curent_page' => $page,
             'page_count' => ceil($all/self::PAGING),
@@ -195,7 +199,7 @@ class Basic_Controller extends REST_Controller
      */
     public function validate_input($input,$is_numeric = FALSE,$is_array = FALSE,$continue = FALSE,$message = self::MSG_INVALID)
     {
-        if (is_null($input) OR $input === "") {
+        if ($input === null OR $input === "") {
             if ($continue) return NULL;
             else $this->response($this->output($message,NULL), $this->_http_code($message));
         }
@@ -218,7 +222,11 @@ class Basic_Controller extends REST_Controller
      */
     public function to_bool($input)
     {
-        return is_null($input) ? FALSE : is_bool($input) ? $input : FALSE;
+        if ($input === null) {
+            return FALSE;
+        }
+
+        return is_bool($input) ? $input : FALSE;
     }
 }
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 08-Dec-18
  * Time: 12:47 PM
  */
@@ -30,7 +30,7 @@ class User_type extends Basic_Controller
             'user_type_lastmodified_id' => $user
         );
 
-        if (is_null($id)) {
+        if ($id === null) {
             $data['user_type_created'] = $this->date_time;
             $data['user_type_created_id'] = $user;
             $data['user_type_is_active'] = TRUE;
@@ -47,8 +47,8 @@ class User_type extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $name = $this->validate_input(@$data['name'],FALSE,TRUE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $name = $this->validate_input(@$data['name'],FALSE,TRUE);
 
         $id = $this->_check_input($user,NULL,$name);
 
@@ -59,9 +59,9 @@ class User_type extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $name = $this->validate_input(@$data['name'],FALSE,TRUE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $name = $this->validate_input(@$data['name'],FALSE,TRUE);
 
         $id = $this->_check_input($user,$id,$name);
 
@@ -75,7 +75,7 @@ class User_type extends Basic_Controller
         $id = $this->validate_input(@$data['id'],TRUE,FALSE,TRUE);
 
         $data = $this->Model_user_type->select($id);
-        if (is_null($data)) {
+        if ($data === null) {
             $this->output_empty();
         }
         else {
@@ -87,7 +87,7 @@ class User_type extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
 
         $data = array(
             'user_type_is_active' => FALSE

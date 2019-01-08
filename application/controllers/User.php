@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: DELL
+ * User: Dharmawan
  * Date: 08-Dec-18
  * Time: 12:45 PM
  */
@@ -31,14 +31,14 @@ class User extends Basic_Controller
             'user_lastmodified_id' => $user
         );
 
-        if (! is_null($key)) {
+        if ($key !== null) {
             $data['user_key'] = $key;
         }
-        if (! is_null($password)) {
+        if ($password !== null) {
             $data['user_password'] = $password;
         }
 
-        if (is_null($id)) {
+        if ($id === null) {
             $data['user_created'] = $this->date_time;
             $data['user_created_id'] = $user;
             $data['user_is_active'] = TRUE;
@@ -55,11 +55,15 @@ class User extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $name = $this->validate_input(@$data['name'],FALSE,FALSE,FALSE);
-        $key = $this->validate_input(@$data['key'],FALSE,FALSE,FALSE);
-        $password = $this->validate_input(@$data['password'],FALSE,TRUE,FALSE);
-        $type = $this->validate_input(@$data['type'],TRUE,TRUE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $name = $this->validate_input(@$data['name']);
+        $key = $this->validate_input(@$data['key']);
+        $password = $this->validate_input(@$data['password'],FALSE,TRUE);
+        $type = $this->validate_input(@$data['type'],TRUE,TRUE);
+
+        if ($this->Model_user->already_used(NULL,$key, 0)) {
+            $this->output_failed();
+        }
 
         $id = $this->_check_input($user,NULL,$name,$key,$password,$type);
 
@@ -70,12 +74,16 @@ class User extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $name = $this->validate_input(@$data['name'],FALSE,FALSE,FALSE);
+        $user = $this->validate_input(@$data['user'],TRUE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $name = $this->validate_input(@$data['name']);
         $key = $this->validate_input(@$data['key'],FALSE,FALSE,TRUE);
         $password = $this->validate_input(@$data['password'],FALSE,TRUE,TRUE);
-        $type = $this->validate_input(@$data['type'],TRUE,TRUE,FALSE);
+        $type = $this->validate_input(@$data['type'],TRUE,TRUE);
+
+        if ($this->Model_user->already_used($id,$key, 1)) {
+            $this->output_failed();
+        }
 
         $id = $this->_check_input($user,$id,$name,$key,$password,$type);
 
@@ -90,7 +98,7 @@ class User extends Basic_Controller
         $status = $this->validate_input(@$data['status'],FALSE,FALSE,TRUE);
 
         $data = $this->Model_user->select($id,$status);
-        if (is_null($data)) {
+        if ($data === null) {
             $this->output_empty();
         }
         else {
@@ -102,7 +110,7 @@ class User extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
 
         $data = array(
             'user_is_active' => FALSE
@@ -115,8 +123,8 @@ class User extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE);
 
         $data = array(
             'user_lastmodified' => $this->date_time,
@@ -132,8 +140,8 @@ class User extends Basic_Controller
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE,FALSE,FALSE);
-        $user = $this->validate_input(@$data['user'],TRUE,FALSE,FALSE);
+        $id = $this->validate_input(@$data['id'],TRUE);
+        $user = $this->validate_input(@$data['user'],TRUE);
 
         $data = array(
             'user_lastmodified' => $this->date_time,
