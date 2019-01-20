@@ -134,6 +134,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 Total Hari : <?php echo $duration; ?> Hari<br>
                 Total Biaya : Rp <?php echo $price*$duration; ?>,-
             </code>
+<!--            <b><h2>Data Pembayaran Rp --><?php //echo $paid; ?><!--,-</h2></b>-->
+<!--            --><?php
+//            if (is_array($payment)) {
+//                foreach ($payment as $item) {
+//                    echo '<code>';
+//                    echo 'Tanggal Bayar : '.date("d M Y",strtotime($item->payment_date)).'<br>';
+//                    echo 'Metode Pembayaran : '.$item->payment_type.' ('.$item->payment_method.')<br>';
+//                    echo 'Jumlah Bayar : Rp '.$item->payment_price.',-<br>';
+//                    echo '</code>';
+//                }
+//            }
+//            else {
+//                echo '<code>Kosong</code>';
+//            }
+//            ?>
             <b><h2>Crew</h2></b>
             <code>
                 <?php
@@ -168,10 +183,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             </code>
         </div>
         <p class="footer">
-            Tabanan, <?php echo date("d M Y",strtotime($created)); ?>
+            Jakarta, <?php echo date("d M Y",strtotime($created)); ?>
             <br>
             <br>
-            (Dharmawan)
+            <br>
+            _______________________
         </p>
     </div>
 </page>

@@ -47,24 +47,19 @@ class Model_reservation extends CI_Model
         $this->db->where('reservation_end <=',$end);
         $this->db->group_end();
         $this->db->group_end();
-        $this->db->where('reservation_is_approved',1);
-        $this->db->where('reservation_is_cancel',NULL);
+        $this->db->group_start();
+        $this->db->where('reservation_finish',1);
+        $this->db->or_where('reservation_is_approved',1);
+        $this->db->group_end();
         $this->db->where('vehicle_id',$id);
         $this->db->from('reservation');
-        return $this->db->count_all_results() == 0;
+        return $this->db->count_all_results() === 0;
     }
 
     public function is_waiting_approval($id)
     {
         $this->db->where('reservation_id',$id);
-        $this->db->group_start();
-        $this->db->where('reservation_is_cancel',NULL);
-        $this->db->where('reservation_cancel_datetime',NULL);
-        $this->db->where('reservation_cancel_id',NULL);
-        $this->db->where('reservation_is_approved',NULL);
-        $this->db->where('reservation_approved_datetime',NULL);
-        $this->db->where('reservation_approved_id',NULL);
-        $this->db->group_end();
+        $this->db->where('reservation_finish',FALSE);
         $this->db->from('reservation');
         return $this->db->count_all_results() > 0;
     }
@@ -77,8 +72,10 @@ class Model_reservation extends CI_Model
         return $this->db->count_all_results() > 0;
     }
 
-    public function select($id, $code, $vehicle, $start, $end, $is_approved, $is_cancel)
+    public function select($id, $code, $vehicle, $start, $end, $is_public, $is_finish, $is_approved)
     {
+        $query_payment = $this->payment_complete(NULL,TRUE);
+
         $this->db->select(
             'reservation.reservation_id as id,
             reservation.reservation_code as code,
@@ -94,17 +91,31 @@ class Model_reservation extends CI_Model
             reservation.reservation_is_approved as is_approved,
             reservation.reservation_approved_datetime as approved_datetime,
             reservation.reservation_approved_id as approved_by,
-            reservation.reservation_is_cancel as is_cancel,
-            reservation.reservation_cancel_datetime as cancel_datetime,
-            reservation.reservation_cancel_id as cancel_by,
             reservation.vehicle_id as vehicle_id,
             vehicle.vehicle_type as vehicle_type,
             vehicle.vehicle_number as vehicle_number,
             reservation.user_id as user,
             reservation.user_type_id as user_type_id,
             reservation.price as price,
-            reservation.reservation_datetime as created'
+            reservation.price*(datediff(reservation.reservation_end,reservation.reservation_start)) as total,
+            reservation.reservation_datetime as created,
+            (
+                case
+                when payment.paid is null
+                then 0
+                else payment.paid
+                end
+            ) as paid,
+            (
+                case
+                when payment.status is null
+                then FALSE
+                else payment.status
+                end
+            ) as status_payment'
         );
+        $this->db->from('reservation,vehicle');
+        $this->db->join('('.$query_payment.') as payment','reservation.reservation_id = payment.reservation_id','left');
         if ($id !== null) {
             $this->db->where('reservation.reservation_id',$id);
         }
@@ -120,37 +131,70 @@ class Model_reservation extends CI_Model
         if ($end !== null) {
             $this->db->where('reservation.reservation_end <=',$end);
         }
+        if ($is_public !== null) {
+            $this->db->where('reservation.user_id'.($is_public ? '' : ' !='),NULL);
+        }
+        if ($is_finish !== null) {
+            $this->db->where('reservation.reservation_finish',$is_finish);
+        }
         if ($is_approved !== null) {
             $this->db->where('reservation.reservation_is_approved',$is_approved);
         }
-        if ($is_cancel !== null) {
-            $this->db->where('reservation.reservation_is_cancel',$is_cancel);
-        }
         $this->db->where('reservation.vehicle_id = vehicle.vehicle_id');
-        $this->db->where('reservation.user_id = user.user_id');
         $this->db->where('reservation.reservation_is_active',TRUE);
-        $this->db->where('reservation.reservation_approved_id = user.user_id');
         $this->db->order_by('reservation.reservation_start','asc');
-        $this->db->from('reservation,vehicle,user');
         $query = $this->db->get();
         $result = $query->result();
         if (count($result) > 0) return $result;
         else return NULL;
     }
 
-    public function insert_crew($data)
+    public function insert_payment($data)
     {
-        $this->db->insert_batch('crew',$data);
+        $this->db->insert('payment',$data);
     }
 
-    public function select_crew($id)
+    public function select_payment($id)
     {
         $this->db->where('reservation_id',$id);
-        $this->db->from('crew');
-        $this->db->order_by('crew_status','asc');
+        $this->db->from('payment');
+        $this->db->order_by('payment_date','asc');
         $query = $this->db->get();
         $result = $query->result();
         if (count($result) > 0) return $result;
         else return NULL;
+    }
+
+    public function payment_complete($id,$output_query = FALSE)
+    {
+        $this->db->select('price*(datediff(reservation_end,reservation_start)) as price,reservation_id');
+        $this->db->from('reservation');
+        $query_price = $this->db->get_compiled_select();
+
+        $this->db->select('sum(payment_price) as total,reservation_id');
+        $this->db->from('payment');
+        $query_payment = $this->db->get_compiled_select();
+
+        $this->db->from('('.$query_price.') as price,('.$query_payment.') as payment');
+        $this->db->where('price.price <= payment.total');
+        $this->db->where('price.reservation_id = payment.reservation_id');
+        if ($output_query) {
+            $this->db->select('
+                price.price as price,
+                payment.total as paid,
+                payment.reservation_id,
+                (
+                    case 
+                    when price.price <= payment.total
+                    then TRUE
+                    else FALSE
+                    end 
+                ) as status
+            ');
+            return $this->db->get_compiled_select();
+        }
+
+        $this->db->where('payment.reservation_id',$id);
+        return $this->db->count_all_results() > 0;
     }
 }

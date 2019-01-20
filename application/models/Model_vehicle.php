@@ -54,7 +54,6 @@ class Model_vehicle extends CI_Model
             vehicle_type as type,
             vehicle_number as number,
             vehicle_status as status,
-            vehicle_price as price,
             (
                 case
                     when jum.jumlah is null || jum.jumlah = 0
@@ -102,41 +101,6 @@ class Model_vehicle extends CI_Model
         );
         $this->db->where('vehicle_feature_id',$id);
         $this->db->from('vehicle_feature');
-        $query = $this->db->get();
-        $result = $query->result();
-        if (count($result) > 0) return $result;
-        else return NULL;
-    }
-
-    public function find_price($id, $date, $user_type)
-    {
-        $this->db->select('price.price_price as normal_price,vehicle.vehicle_price as global_price');
-        $this->db->where('vehicle.vehicle_id',$id);
-        $this->db->order_by('price.price_start', 'desc');
-        $this->db->limit(1);
-        $this->db->from('vehicle');
-        $this->db->join('price',"vehicle.vehicle_id = price.vehicle_id AND price.user_type_id = ".$user_type." AND price.price_start <= '".$date."'",'left');
-        $query = $this->db->get();
-        $result = $query->result();
-        if (count($result) > 0) return $result[0];
-        else return NULL;
-    }
-
-    public function update_price($data)
-    {
-        if (count($data) > 0) {
-            $this->db->insert_batch('price',$data);
-        }
-    }
-
-    public function select_price($id)
-    {
-        $this->db->select('p.price_price as price, p.price_start as start, p.user_type_id as type_id, u.user_type_name as type_name');
-        $this->db->where('p.vehicle_id',$id);
-        $this->db->where('p.user_type_id=u.user_type_id');
-        $this->db->order_by('p.user_type_id','asc');
-        $this->db->order_by('p.price_start','desc');
-        $this->db->from('price p, user_type u');
         $query = $this->db->get();
         $result = $query->result();
         if (count($result) > 0) return $result;

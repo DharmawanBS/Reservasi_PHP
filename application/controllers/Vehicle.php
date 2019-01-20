@@ -21,12 +21,11 @@ class Vehicle extends Basic_Controller
         $this->load->model('Model_vehicle');
     }
 
-    private function _check_input($user,$id,$type,$number,$price,$feature)
+    private function _check_input($user,$id,$type,$number,$feature)
     {
         $data = array(
             'vehicle_type' => $type,
             'vehicle_number' => $number,
-            'vehicle_price' => $price,
             'vehicle_lastmodified' => $this->date_time,
             'vehicle_lastmodified_id' => $user
         );
@@ -69,16 +68,9 @@ class Vehicle extends Basic_Controller
         $user = $this->validate_input(@$data['user'],TRUE);
         $type = $this->validate_input(@$data['type']);
         $number = $this->validate_input(@$data['number']);
-        $price = $this->validate_input(@$data['price'],TRUE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
-        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,TRUE);
 
-        $id = $this->_check_input($user,NULL,$type,$number,$price,$feature);
-
-        if ($prices !== null) {
-            $data = $this->_price_post($user, $id, $prices);
-            $this->Model_vehicle->update_price($data);
-        }
+        $id = $this->_check_input($user,NULL,$type,$number,$feature);
 
         $this->output_ok($id);
     }
@@ -91,16 +83,9 @@ class Vehicle extends Basic_Controller
         $id = $this->validate_input(@$data['id'],TRUE);
         $type = $this->validate_input(@$data['type']);
         $number = $this->validate_input(@$data['number']);
-        $price = $this->validate_input(@$data['price'],TRUE);
         $feature = $this->validate_input(@$data['feature'],FALSE,TRUE,TRUE);
-        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE,TRUE);
 
-        $id = $this->_check_input($user,$id,$type,$number,$price,$feature);
-
-        if ($prices !== null) {
-            $data = $this->_price_post($user, $id, $prices);
-            $this->Model_vehicle->update_price($data);
-        }
+        $id = $this->_check_input($user,$id,$type,$number,$feature);
 
         $this->output_ok($id);
     }
@@ -127,7 +112,6 @@ class Vehicle extends Basic_Controller
         else {
             for($i=0, $iMax = count($data); $i< $iMax; $i++) {
                 $data[$i]->feature = $this->Model_vehicle->select_feature($data[$i]->id);
-                $data[$i]->prices = $this->Model_vehicle->select_price($data[$i]->id);
             }
             $this->output_ok($data);
         }
@@ -144,43 +128,6 @@ class Vehicle extends Basic_Controller
         );
         $this->Model_vehicle->update($data,$id);
         $this->output_ok(NULL);
-    }
-
-    public function price_post()
-    {
-        //  get input data
-        $data = json_decode(file_get_contents('php://input'), TRUE);
-        $user = $this->validate_input(@$data['user'],TRUE);
-        $prices = $this->validate_input(@$data['prices'],FALSE,TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE);
-
-        $data = $this->_price_post($user,$id,$prices);
-
-        $this->Model_vehicle->update_price($data);
-
-        $this->output_ok(NULL);
-    }
-
-    private function _price_post($user,$vehicle,$prices)
-    {
-        $data = array();
-        foreach ($prices as $item)
-        {
-            $price = $this->validate_input(@$item['price'],TRUE);
-            $start = $this->validate_input(@$item['start']);
-            $usertype = $this->validate_input(@$item['usertype'],TRUE);
-
-            $temp = array(
-                'price_price' => $price,
-                'price_start' => $start,
-                'vehicle_id' => $vehicle,
-                'user_type_id' => $usertype,
-                'price_created' => $this->date_time,
-                'price_created_id' => $user
-            );
-            $data[] = $temp;
-        }
-        return $data;
     }
 
     public function activate_post()
@@ -215,21 +162,5 @@ class Vehicle extends Basic_Controller
         $this->Model_vehicle->update($data,$id);
 
         $this->output_ok(NULL);
-    }
-
-    public function find_price_post()
-    {
-        //  get input data
-        $data = json_decode(file_get_contents('php://input'), TRUE);
-        $id = $this->validate_input(@$data['id'],TRUE);
-        $user_type = $this->validate_input(@$data['user_type'],TRUE);
-
-        $prices = $this->Model_vehicle->find_price($id,$this->date,$user_type);
-        if ($prices) {
-            $this->output_ok($prices);
-        }
-        else {
-            $this->output_empty();
-        }
     }
 }

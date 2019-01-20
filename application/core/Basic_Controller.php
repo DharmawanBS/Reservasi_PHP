@@ -222,7 +222,7 @@ class Basic_Controller extends REST_Controller
      */
     public function to_bool($input)
     {
-        if ($input === null) {
+        if ($input === NULL) {
             return FALSE;
         }
 
