@@ -13,7 +13,7 @@
  */
 class Reservation extends Basic_Controller
 {
-    private $month;
+    protected $month_key;
 
     /**
      * Reservation constructor.
@@ -24,7 +24,7 @@ class Reservation extends Basic_Controller
 
         $this->load->model(array('Model_vehicle','Model_reservation','Model_user_type'));
 
-        $this->month = array(
+        $this->month_key = array(
             'JA',
             'FB',
             'MR',
@@ -175,7 +175,7 @@ class Reservation extends Basic_Controller
 
     private function _generate_code($id)
     {
-        return $this->month[(int)date("m") - 1] . $id . '-' . date("Y") % 2000;
+        return $this->month_key[(int)date("m") - 1] . $id . '-' . date("Y") % 2000;
     }
 
     private function _status($id,$approved,$price,$payment)

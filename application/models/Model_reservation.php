@@ -176,7 +176,6 @@ class Model_reservation extends CI_Model
         $query_payment = $this->db->get_compiled_select();
 
         $this->db->from('('.$query_price.') as price,('.$query_payment.') as payment');
-        $this->db->where('price.price <= payment.total');
         $this->db->where('price.reservation_id = payment.reservation_id');
         if ($output_query) {
             $this->db->select('
@@ -193,7 +192,7 @@ class Model_reservation extends CI_Model
             ');
             return $this->db->get_compiled_select();
         }
-
+        $this->db->where('price.price <= payment.total');
         $this->db->where('payment.reservation_id',$id);
         return $this->db->count_all_results() > 0;
     }

@@ -11,6 +11,8 @@ class Basic_Controller extends REST_Controller
 {
     protected $date_time;
     protected $date;
+    protected $month;
+    protected $year;
 
     const MSG_OK = 'OK';
     // ouput failed
@@ -43,6 +45,8 @@ class Basic_Controller extends REST_Controller
 
         $this->date_time = date("Y-m-d H:i:s");
         $this->date = date("Y-m-d");
+        $this->month = date("m");
+        $this->year = date("Y");
     }
 
     public static function access()
