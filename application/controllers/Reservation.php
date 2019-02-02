@@ -95,7 +95,7 @@ class Reservation extends Basic_Controller
         }
     }
 
-    private function _pre($user)
+    private function _pre($user,$is_approved = NULL)
     {
         //  get input data
         $data = json_decode(file_get_contents('php://input'), TRUE);
@@ -110,21 +110,21 @@ class Reservation extends Basic_Controller
         $notes = $this->validate_input(@$data['notes']);
         $user_type_id = $this->validate_input(@$data['user_type_id'],TRUE,FALSE,TRUE);
 
-        $price = NULL;
+        $price = $this->validate_input(@$data['price'],TRUE,FALSE,TRUE);
 
-        if ($user !== null) {
-            if ($this->Model_user_type->is_admin($user)) {
-                $is_approved = TRUE;
-                $approve_datetime = $this->date_time;
-                $approve_id = $user;
-
-                $price = $this->validate_input(@$data['price'],TRUE,FALSE,TRUE);
+        if ($is_approved === null) {
+            if ($user !== null) {
+                if ($this->Model_user_type->is_admin($user)) {
+                    $is_approved = TRUE;
+                    $approve_datetime = $this->date_time;
+                    $approve_id = $user;
+                }
             }
-        }
-        else {
-            $is_approved = NULL;
-            $approve_datetime = NULL;
-            $approve_id = NULL;
+            else {
+                $is_approved = NULL;
+                $approve_datetime = NULL;
+                $approve_id = NULL;
+            }
         }
 
         return array(
@@ -227,7 +227,7 @@ class Reservation extends Basic_Controller
         $is_approved = $this->to_bool($is_approved);
 
         if ($this->Model_reservation->is_waiting_approval($id)) {
-            $data = $this->_pre($user);
+            $data = $this->_pre($user,$is_approved);
 
             $this->_set_payment($id,$is_approved);
             $is_payment_completed = $this->Model_reservation->payment_complete($id);
